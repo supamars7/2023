@@ -3,6 +3,68 @@ import Tile from "./Tile.js"
 
 const gameBoard = document.getElementById("game-board")
 
+// Function to check if the waiting period has passed
+function canPlayGame() {
+    const lastPlayed = localStorage.getItem('lastPlayed');
+    if (lastPlayed) {
+        const currentTime = new Date().getTime();
+        const timeSinceLastPlayed = currentTime - parseInt(lastPlayed, 10);
+        const hoursSinceLastPlayed = timeSinceLastPlayed / (1000 * 60 * 60);
+
+        // Allow play if 24 hours have passed
+        if (hoursSinceLastPlayed >= 24) {
+            return true;
+        } else {
+            // Calculate and return remaining hours
+            const remainingHours = 24 - hoursSinceLastPlayed;
+            return remainingHours;
+        }
+    }
+
+    // If there's no record of lastPlayed, allow play
+    return true;
+}
+
+// Function to start a new game
+function startNewGame() {
+    if (canPlayGame() === true) {
+        // Start the game
+        // ... (Your game initialization code)
+
+        // Record the current time
+        localStorage.setItem('lastPlayed', new Date().getTime().toString());
+    } else {
+        const remainingHours = canPlayGame();
+        alert(`Please wait ${remainingHours.toFixed(2)} hours before playing again.`);
+    }
+}
+
+// Function to show the waiting modal
+function showWaitingModal(remainingHours) {
+    const modal = document.getElementById('modal');
+    const modalMessage = document.getElementById('modal-message');
+    const remainingHoursSpan = document.getElementById('remaining-hours');
+    
+    modal.style.display = 'block';
+    remainingHoursSpan.textContent = remainingHours.toFixed(2);
+    
+    // Close the modal when the player clicks the "x" button
+    const closeModalButton = document.getElementById('close-modal');
+    closeModalButton.onclick = function () {
+        modal.style.display = 'none';
+    };
+    
+    // Close the modal when the player clicks outside of it
+    window.onclick = function (event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+}
+
+
+
+
 const grid = new Grid(gameBoard)
 grid.randomEmptyCell().tile = new Tile(gameBoard)
 grid.randomEmptyCell().tile = new Tile(gameBoard)
@@ -132,3 +194,6 @@ function canMove(cells) {
         })
     })
 }
+
+// Call startNewGame when you want to initiate a new game
+startNewGame();
