@@ -1,3 +1,5 @@
+let gameStarted = false;
+
 import Grid from "./Grid.js"
 import Tile from "./Tile.js"
 
@@ -27,17 +29,30 @@ function canPlayGame() {
 
 // Function to start a new game
 function startNewGame() {
-    if (canPlayGame() === true) {
-        // Start the game
-        // ... (Your game initialization code)
+    const currentTime = new Date().getTime();
+    const lastPlayed = localStorage.getItem('lastPlayed');
 
-        // Record the current time
-        localStorage.setItem('lastPlayed', new Date().getTime().toString());
+    if (!gameStarted || (lastPlayed && (currentTime - lastPlayed) >= 24 * 60 * 60 * 1000)) {
+        // Either the game hasn't started or the waiting period has passed
+        if (canPlayGame() === true) {
+            // Start the game
+            // ... (Your game initialization code)
+
+            // Record that the game has started
+            gameStarted = true;
+
+            // Record the current time
+            localStorage.setItem('lastPlayed', currentTime);
+        } else {
+            const remainingHours = canPlayGame();
+            showWaitingModal(remainingHours);
+        }
     } else {
-        const remainingHours = canPlayGame();
-        alert(`Please wait ${remainingHours.toFixed(2)} hours before playing again.`);
+        const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - (currentTime - lastPlayed)) / (60 * 60 * 1000));
+        showWaitingModal(hoursLeft);
     }
 }
+
 
 // Function to show the waiting modal
 function showWaitingModal(remainingHours) {
